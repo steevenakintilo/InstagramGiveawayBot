@@ -14,6 +14,7 @@ import pickle
 import os
 import emoji
 
+from search import giveaway_from_url_file , get_list_of_comment_of_a_post
 import yaml
 
 class Scraper:
@@ -40,11 +41,17 @@ class Scraper:
     account_email_or_username = data["account_email_or_username"]
     account_password = data["account_password"]
 
+def print_file_info(path):
+    f = open(path, 'r',encoding="utf-8")
+    content = f.read()
+    f.close()
+    return(content)
+
 def login(S,username,password):
     try:
       S.driver.implicitly_wait(15)
       S.driver.get("https://www.instagram.com/")
-      
+      #time.sleep(1000000)
       try:
         element = WebDriverWait(S.driver, 5).until(
           EC.presence_of_element_located((By.XPATH, S.accept_coockie_xpath)))
@@ -73,7 +80,7 @@ def login(S,username,password):
       time.sleep(5)
       
       print("Login done")
-      time.sleep(5)
+      time.sleep(10)
     except:
        print("Login not done wrong username/password check it on the configuration.yml file")
        time.sleep(5)
@@ -83,17 +90,28 @@ def like_a_post(S,url):
   try:
     S.driver.implicitly_wait(15)
     S.driver.get(url)
-    element = WebDriverWait(S.driver, 15).until(
-      EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[1]/span[1]/div/div")))
-    element.click()
-    time.sleep(2)
+    time.sleep(5)
+    try:
+      element = WebDriverWait(S.driver, 5).until(
+        EC.presence_of_element_located((By.XPATH,"/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[1]/span[1]/div/div/span")))
+      
+      S.driver.execute_script("arguments[0].scrollIntoView();", element)
+      time.sleep(5)
+      actions = ActionChains(S.driver)
+      actions.move_to_element(element).click().perform()
+
+      time.sleep(5)
+      return True
+    except:
+       return False
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
         print("Wifi error sleeping 3 minutes")
         time.sleep(180)
      else:
         print("Bref like")
-        
+        traceback.print_exc()
+
 def comment_a_post(S,url,text):
   try:
     S.driver.implicitly_wait(15)
@@ -139,7 +157,6 @@ def follow_an_user(S,user):
         time.sleep(180)
      else:
         print("Bref follow")
-        traceback.print_exc()
 
 
 def save_a_post(S,url):
@@ -159,23 +176,34 @@ def save_a_post(S,url):
         time.sleep(180)
      else:
         print("Bref save")
-        traceback.print_exc()
 
 def get_tweet_text(S,url):
   try:
     S.driver.implicitly_wait(15)
     S.driver.get(url)
-    element = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[2]/div/div[1]/div/div[2]/div/span/div/span")))      
+    try:
+      element = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[2]/div/div[1]/div/div[2]/div/span/div/span")))      
+      return (element.text,"")
+    except:
+       print("fail")
+    try:
+      element = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/article/div/div[2]/div/div[2]/div[1]/ul/div[1]")))      
+      element_to_not_split = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/article/div/div[2]/div/div[2]/div[1]/ul/div[1]")))      
+      print("succed after 2nd retry")
+      return (element_to_not_split.text,str(element.text).split("\n")[0])
+    except:
+       print("fail 2")
+       pass
     time.sleep(3)
     return (element.text)
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
         print("Wifi error sleeping 3 minutes")
         time.sleep(180)
-        return("")
+        return("","")
      else:
         print("Bref text")
-        return("")
+        return("","")
 
 
 def get_tweet_user(S,url):
@@ -191,7 +219,6 @@ def get_tweet_user(S,url):
         time.sleep(180)
         return("")
      else:
-        print("Bref text user")
         return("")
 
 def save_coockie(selenium_session):
@@ -203,37 +230,67 @@ def print_pkl_info():
         data = pickle.load(file)
     return (data)
 
+
+def write_into_file(path, x):
+    with open(path, "w") as f:
+        f.write(str(x))
 def instabot():
   S = Scraper()
-  # try:
-  #   #a = 10/0
-  #   ck = print_pkl_info()
-  #   if len(str(ck)) > 5:
-  #     S.driver.implicitly_wait(15)
-  #     S.driver.get("https://www.instagram.com/")
-  #     try:
-  #       element = WebDriverWait(S.driver, 15).until(
-  #         EC.presence_of_element_located((By.XPATH, S.accept_coockie_xpath)))
-  #     except:
-  #       element = WebDriverWait(S.driver, 15).until(
-  #         EC.presence_of_element_located((By.XPATH, S.refuse_coockie_xpath)))
-    
-  #     element.click()
-  #     cookies = pickle.load(open(f"cookies.pkl","rb"))
-  #     for cookie in cookies:
-  #         S.driver.add_cookie(cookie)
-  #     time.sleep(0.2)
-  #     time.sleep(5)
-  #     comment_a_post(S,"https://www.instagram.com/p/C5OopjjsM3m/","conndedede ded dard")
-  #     time.sleep(10000)
-  # except:
-  #   print("fin bref")
-  #   login(S,"totogaming1010","steeven1")
-  #   comment_a_post(S,"https://www.instagram.com/p/C5OopjjsM3m/","conndedede ded dard")
-  #   save_coockie(S)
-  #   time.sleep(10000)
   
-  login(S,"totogaming1010","steeven1")
-  get_tweet_user(S,"https://www.instagram.com/p/C5OopjjsM3m/")
-  time.sleep(10000)
+  login(S,S.account_email_or_username,S.account_password)
+
+  time.sleep(5)
+  url = "https://www.instagram.com/reborn.fr/p/C4LZXt2sv7s/"
+    
+  list_of_tweet_ = print_file_info("urls.txt").split("\n")
+  list_of_tweet = []
+  for l in list_of_tweet_:
+     if len(l) > 5:
+        list_of_tweet.append(l)
+     else:
+        print("skip")
+  tweet_text = []
+  tweet_user_made = []
+  tweet_url = []
+
+  time.sleep(10)
+
+  idx = 0
+  for url in list_of_tweet:
+    s_text , s_user_ = get_tweet_text(S,url)
+    s_user = get_tweet_user(S,url)
+
+    time.sleep(5)
+    if s_user_ != "":
+      tweet_text.append(s_text)
+      tweet_user_made.append(s_user_)
+      if s_text != "" and s_user_ != "":
+        tweet_url.append(url)
+    else:
+      if s_text != "":
+        tweet_text.append(s_text)
+      if s_user != "":
+        tweet_user_made.append(s_user)
+      if s_text != "" and s_user != "":
+        tweet_url.append(url)
+
+  t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
+  
+  for url in tweet_url:
+    if like_a_post(S,url) == True:
+      if t_comment_or_not[idx] == True:
+          comment_a_post(S,url,t_full_comment[idx])
+      save_a_post(S,url)
+
+      time.sleep(300 * 5)
+    else:
+      print("you have already liked the post")
+      time.sleep(30)
+    idx+=1
+  
+  for acc in t_follows:
+     follow_an_user(S,acc)
+     time.sleep(600)
+  
+  print("All done")
   pass

@@ -91,17 +91,15 @@ def like_a_post(S,url):
     S.driver.implicitly_wait(15)
     S.driver.get(url)
     time.sleep(5)
-    try:
-      element = WebDriverWait(S.driver, 5).until(
-        EC.presence_of_element_located((By.XPATH,"/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[1]/span[1]/div/div/span")))
-      
-      S.driver.execute_script("arguments[0].scrollIntoView();", element)
-      time.sleep(5)
-      actions = ActionChains(S.driver)
-      actions.move_to_element(element).click().perform()
-
-      time.sleep(5)
-      return True
+    try:     
+        element = WebDriverWait(S.driver, 5).until(
+        EC.presence_of_elements_located((By.CSS_SELECTOR, "[aria-label='J’aime']")))
+        S.driver.execute_script("arguments[0].scrollIntoView();", element[0])
+        time.sleep(5)
+        actions = ActionChains(S.driver)
+        actions.move_to_element(element[0]).click().perform()
+        time.sleep(5)
+        return True
     except:
        return False
   except Exception as e:
@@ -110,7 +108,6 @@ def like_a_post(S,url):
         time.sleep(180)
      else:
         print("Bref like")
-        traceback.print_exc()
 
 def comment_a_post(S,url,text):
   try:
@@ -138,18 +135,30 @@ def comment_a_post(S,url,text):
      else:
         print("Bref comment")
 
-def follow_an_user(S,user):
+def follow_an_user(S,user,mode):
    
   try:
     S.driver.implicitly_wait(15)
     S.driver.get("https://www.instagram.com/" + user + "/")
 
     try:
-      button_follow = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Suivre')]")))      
-      button_follow.click()
+      if mode == 1:
+        button_follow = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Suivre')]")))      
+        S.driver.execute_script("arguments[0].scrollIntoView();", button_follow)
+        button_follow.click()
+
+      else:
+        button_follow = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Suivre')]")))      
+        S.driver.execute_script("arguments[0].scrollIntoView();", button_follow)
+        time.sleep(5)
+        actions = ActionChains(S.driver)
+        actions.move_to_element(button_follow).click().perform()
+
       print("You have followed an another account " , user)
+      return True
     except:
-       print("You already follow the account")
+      print("You already follow the account")
+      return False
     time.sleep(3)
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
@@ -237,8 +246,14 @@ def write_into_file(path, x):
 def instabot():
   S = Scraper()
   
-  login(S,S.account_email_or_username,S.account_password)
-
+  try:
+    login(S,S.account_email_or_username,S.account_password)
+  except:
+    S.driver.close()
+    time.sleep(10)
+    S = Scraper()
+    login(S,S.account_email_or_username,S.account_password)
+     
   time.sleep(5)
   url = "https://www.instagram.com/reborn.fr/p/C4LZXt2sv7s/"
     
@@ -252,8 +267,6 @@ def instabot():
   tweet_text = []
   tweet_user_made = []
   tweet_url = []
-
-  time.sleep(10)
 
   idx = 0
   for url in list_of_tweet:
@@ -276,21 +289,34 @@ def instabot():
 
   t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
   
-  for url in tweet_url:
-    if like_a_post(S,url) == True:
-      if t_comment_or_not[idx] == True:
+  a = "d"
+  if a == "dd":
+    for url in tweet_url:
+      print(f"Giveaway {idx} / {len(tweet_url)}")
+      if like_a_post(S,url) == True:
+        time.sleep(5)
+        a = like_a_post(S,url)
+        print("Value of a " , a)
+        if t_comment_or_not[idx] == True:
           comment_a_post(S,url,t_full_comment[idx])
-      save_a_post(S,url)
+        save_a_post(S,url)
 
-      time.sleep(300 * 5)
-    else:
-      print("you have already liked the post")
-      time.sleep(30)
-    idx+=1
-  
-  for acc in t_follows:
-     follow_an_user(S,acc)
-     time.sleep(600)
-  
+        time.sleep(24)
+      else:
+        print("you have already liked the post")
+        time.sleep(30)
+      idx+=1
+    
+  user_nb = 0
+  if a == "k":
+    for acc in t_follows:
+      print(f"User Nb: {user_nb} / {len(t_follows)}")
+      if follow_an_user(S,acc,1) == True:
+        time.sleep(5)
+        follow_an_user(S,acc,2)
+        time.sleep(555)
+      else:
+        time.sleep(20)
+      user_nb+=1
   print("All done")
   pass

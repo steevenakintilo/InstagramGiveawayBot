@@ -17,11 +17,6 @@ word_list_to_not_check_for_copy:
   - "quelque"
   - "quelque"
   - "quelques"
-  - "écrit par"
-  - "commenter ce post "
-  - "commentez ce post "
-  - "commente ce post "
-  - "écris par"
 
 # Those are the word needed on the tweet for the bot to comment when the tweet ask to comment one thing in particular
 word_list_to_check_for_special_comment:

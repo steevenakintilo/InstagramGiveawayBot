@@ -90,25 +90,34 @@ def like_a_post(S,url):
   try:
     S.driver.implicitly_wait(15)
     S.driver.get(url)
-    time.sleep(5)
+    time.sleep(2.5)
     try:     
         element = WebDriverWait(S.driver, 5).until(
-        EC.presence_of_elements_located((By.CSS_SELECTOR, "[aria-label='J’aime']")))
-        S.driver.execute_script("arguments[0].scrollIntoView();", element[0])
-        time.sleep(5)
+        EC.presence_of_element_located((By.XPATH,"/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[3]/section[1]/div[1]/span[1]/div/div/span")))
+        S.driver.execute_script("arguments[0].scrollIntoView();", element)
+        time.sleep(2.5)
         actions = ActionChains(S.driver)
-        actions.move_to_element(element[0]).click().perform()
-        time.sleep(5)
+
+        actions.move_to_element(element).click().perform()
+        time.sleep(0.2)
+        actions.move_to_element(element).click().perform()
+        time.sleep(0.2)
+        actions.move_to_element(element).click().perform()
+        time.sleep(0.2)
+        actions.move_to_element(element).click().perform()
+        
+        time.sleep(2.5)
         return True
     except:
-       return False
+       return True
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
         print("Wifi error sleeping 3 minutes")
         time.sleep(180)
+        return True
      else:
         print("Bref like")
-
+        return True
 def comment_a_post(S,url,text):
   try:
     S.driver.implicitly_wait(15)
@@ -254,9 +263,7 @@ def instabot():
     S = Scraper()
     login(S,S.account_email_or_username,S.account_password)
      
-  time.sleep(5)
-  url = "https://www.instagram.com/reborn.fr/p/C4LZXt2sv7s/"
-    
+  time.sleep(5)  
   list_of_tweet_ = print_file_info("urls.txt").split("\n")
   list_of_tweet = []
   for l in list_of_tweet_:
@@ -267,7 +274,6 @@ def instabot():
   tweet_text = []
   tweet_user_made = []
   tweet_url = []
-
   idx = 0
   for url in list_of_tweet:
     s_text , s_user_ = get_tweet_text(S,url)
@@ -290,33 +296,36 @@ def instabot():
   t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
   
   a = "d"
-  if a == "dd":
+  if a == "d":
     for url in tweet_url:
       print(f"Giveaway {idx} / {len(tweet_url)}")
       if like_a_post(S,url) == True:
         time.sleep(5)
-        a = like_a_post(S,url)
-        print("Value of a " , a)
+        #a = like_a_post(S,url)
+        #print("Value of a " , a)
         if t_comment_or_not[idx] == True:
           comment_a_post(S,url,t_full_comment[idx])
         save_a_post(S,url)
 
-        time.sleep(24)
+        if "@" in t_full_comment[idx]:
+           time.sleep(300)
+        else:
+            time.sleep(600)
       else:
         print("you have already liked the post")
         time.sleep(30)
       idx+=1
     
   user_nb = 0
-  if a == "k":
-    for acc in t_follows:
-      print(f"User Nb: {user_nb} / {len(t_follows)}")
-      if follow_an_user(S,acc,1) == True:
-        time.sleep(5)
-        follow_an_user(S,acc,2)
-        time.sleep(555)
-      else:
-        time.sleep(20)
-      user_nb+=1
+  for acc in t_follows:
+    print(f"User Nb: {user_nb} / {len(t_follows)}")
+    if follow_an_user(S,acc,1) == True:
+      time.sleep(5)
+      follow_an_user(S,acc,2)
+      time.sleep(200)
+    else:
+      time.sleep(20)
+    user_nb+=1
   print("All done")
   pass
+

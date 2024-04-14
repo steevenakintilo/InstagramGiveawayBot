@@ -184,18 +184,19 @@ def delete_url(s):
     return n
 
 def who_many_people_to_tag(text,accounts_to_tag):
+    acc = random.sample(accounts_to_tag, 3)
     text = text.replace("\n", " ") 
     d = Data()
     
     for one in d.one_poeple_list:
         if one.lower() in text.lower():
-            return(accounts_to_tag[0])
+            return(acc[0])
     
     for two in d.two_poeple_list:
         if two.lower() in text.lower():
-            return(accounts_to_tag[0]+" "+accounts_to_tag[1])
+            return(acc[0]+" "+acc[1])
     
-    return(" ".join(accounts_to_tag))
+    return(" ".join(acc))
     
 def check_if_we_need_to_tag_two(text):
     text = text.replace("\n", " ") 
@@ -263,7 +264,7 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
       accounts_to_tag_ = random.sample(accounts_to_tag_, len(accounts_to_tag_))
       accounts_to_tag = []
       if len(accounts_to_tag_) >= 3:
-          for i in range(3):
+          for i in range(len(accounts_to_tag_)):
               if i == 0:
                   accounts_to_tag.append(" " + accounts_to_tag_[i])
               else:
@@ -333,7 +334,7 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
           else:
               if len(account) > 1 and account not in full_list_of_account_to_follow:
                   full_list_of_account_to_follow.append(account)
-      if print_data == True:
+      if print_data == False:
           print(tweets_full_comment)
           print(tweets_need_to_comment_or_not)
           print(full_list_of_account_to_follow)

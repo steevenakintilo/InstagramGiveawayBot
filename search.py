@@ -289,22 +289,22 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
         if check_if_we_need_to_tag(t) == True:
           if check_if_we_need_to_comment(t) == True:
               if what_to_cmt == "Ok!":
-                full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+                full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
               else:
                 full_phrase = delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
           else:
               nb_word = what_to_cmt.split()
-              full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+              full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
               if what_to_cmt == "Ok!":
                   if d.add_sentence_to_tag == True and len(nb_word) >= 5:
-                    full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+                    full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
                   else:
-                    full_phrase = delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+                    full_phrase = delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
               else:
                   if d.add_sentence_to_tag == True and len(nb_word) >= 5:
-                    full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+                    full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
                   elif d.add_sentence_to_tag == False and len(nb_word) >= 5:
-                    full_phrase = delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+                    full_phrase = delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
                 
         else:
           if check_if_we_need_to_comment(t) == True:

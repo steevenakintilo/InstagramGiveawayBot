@@ -60,7 +60,7 @@ def reset_file(path):
 
 def insta_giveaway(S,i,page_nb):
     urls = []
-    file_urls = print_file_info("urls.txt").split("\n")
+    file_urls = print_file_info("url.txt").split("\n")
     S.driver.get(f"https://www.jeu-concours.biz/concours-instagram.php?page={page_nb}")
     cookiesbtn = "/html/body/div[14]/div[2]/div[1]/div[2]/div[2]/button[1]/p"
     try:
@@ -90,9 +90,8 @@ def insta_giveaway(S,i,page_nb):
     time.sleep(0.1)
 
     new_window_url = S.driver.current_url
-    
     if new_window_url not in urls and new_window_url not in file_urls:
-       write_into_file("urls.txt",new_window_url + "\n")
+       write_into_file("url.txt",new_window_url + "\n")
        write_into_file("recent_urls.txt",new_window_url + "\n")
        urls.append(new_window_url)
 

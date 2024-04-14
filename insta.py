@@ -12,6 +12,8 @@ from random import randint
 import undetected_chromedriver as uc 
 import pickle
 import os
+import json
+
 import emoji
 
 from search import giveaway_from_url_file , get_list_of_comment_of_a_post
@@ -278,17 +280,42 @@ def write_into_file(path, x):
 def instabot():
   S = Scraper()
   
+  # try:
+  # #   login(S,S.account_email_or_username,S.account_password)
+  # except:
+  #   return("")
+
   try:
-    login(S,S.account_email_or_username,S.account_password)
+    #a = 10/0
+    ck = print_pkl_info()
+    if len(str(ck)) > 5:
+      S.driver.implicitly_wait(15)
+      S.driver.get("https://www.instagram.com/")
+      try:
+        element = WebDriverWait(S.driver, 15).until(
+          EC.presence_of_element_located((By.XPATH, S.accept_coockie_xpath)))
+      except:
+        element = WebDriverWait(S.driver, 15).until(
+          EC.presence_of_element_located((By.XPATH, S.refuse_coockie_xpath)))
+
+      element.click()
+      try:
+        cookies = json.load(open(f"cookies.json","rb"))
+      except:
+        cookies = pickle.load(open(f"cookies.pkl","rb"))
+      
+      for cookie in cookies:
+          S.driver.add_cookie(cookie)
+      time.sleep(0.2)
+      time.sleep(5)
   except:
-    S.driver.close()
-    time.sleep(10)
-    S = Scraper()
+    print("fin bref")
     login(S,S.account_email_or_username,S.account_password)
-     
+    save_coockie(S)
+    
   time.sleep(5)
 
-  list_of_tweet_ = print_file_info("urls.txt").split("\n")
+  list_of_tweet_ = print_file_info("recent_urls.txt").split("\n")
   list_of_tweet = []
   for l in list_of_tweet_:
      if len(l) > 5:
@@ -298,6 +325,9 @@ def instabot():
   tweet_text = []
   tweet_user_made = []
   tweet_url = []
+  failed_giveaway_url = []
+  failed_giveaway_comment = []
+  
   idx = 0
   for url in list_of_tweet:
     s_text , s_user_ = get_tweet_text(S,url)
@@ -317,6 +347,7 @@ def instabot():
       if s_text != "" and s_user != "":
         tweet_url.append(url)
 
+  time.sleep(30)
   t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
   
   for url in tweet_url:
@@ -324,23 +355,26 @@ def instabot():
     if like_a_post(S,url) == True:
       time.sleep(5)
       if t_comment_or_not[idx] == True:
-        if comment_a_post(S,url,t_full_comment[idx]) == False:
-            time.sleep(600)
-            like_a_post(S,url)
-            comment_a_post(S,url,t_full_comment[idx])
+         if comment_a_post(S,url,t_full_comment[idx]) == False:
+            watch_reels(S,1)
+            failed_giveaway_url.append(url)
+            failed_giveaway_comment.append(t_full_comment[idx])
+            # like_a_post(S,url)
+            # watch_reels(S,4)
+            # comment_a_post(S,url,t_full_comment[idx])
       save_a_post(S,url)
 
       x = randint(1,2)
       if "@" in t_full_comment[idx]:
           if x == 1:
-            time.sleep(300)
+            time.sleep(60)
           else:
-            watch_reels(S,5)
+            watch_reels(S,2)
       else:
           if x == 1:
-            time.sleep(750)
+            time.sleep(120)
           else:
-            watch_reels(S,12)
+            watch_reels(S,3)
     else:
       print("you have already liked the post")
       time.sleep(30)
@@ -353,13 +387,37 @@ def instabot():
     if follow_an_user(S,acc,1) == True:
       time.sleep(5)
       follow_an_user(S,acc,2)
+      write_into_file("follow.txt",acc.lower()+"\n")
       if x == 4:
-         watch_reels(S,5)
+         watch_reels(S,3)
       else:
-        time.sleep(300)
+        time.sleep(180)
     else:
       time.sleep(20)
     user_nb+=1
+  
+  if len(failed_giveaway_url) > 0:
+     time.sleep(120)
+     for i in range(len(failed_giveaway_url)):
+        print(f"Retry giveaway {i} / {len(failed_giveaway_url)}")
+        if like_a_post(S,failed_giveaway_url[i]) == True:
+          comment_a_post(S,failed_giveaway_url[i],failed_giveaway_comment[i])
+          save_a_post(S,failed_giveaway_url[i])
+          x = randint(1,2)
+          if "@" in t_full_comment[idx]:
+              if x == 1:
+                time.sleep(60)
+              else:
+                watch_reels(S,2)
+          else:
+              if x == 1:
+                time.sleep(120)
+              else:
+                watch_reels(S,3)
+        else:
+           print("You have already liked the tweet")
+           time.sleep(30)
+
   print("All done")
   pass
 

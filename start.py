@@ -3,22 +3,35 @@ import traceback
 import time
 
 from giveaway import print_file_info , reset_file
+from os import system
 
-MAX = 50
+from random import randint
 
-reset_file("recent_urls.txt")
+MAX = 5
 
-try:
-  for j in range(1,5):
-    for i in range(1,51):
-      try:
-        system(f"python giveaway.py {i} {j}")
-        print("Nb of giveaway found " , len(print_file_info("recent_urls.txt").split("\n")))
-        if len(print_file_info("recent_urls.txt").split("\n")) > 50:
-          exit()
-      except:
-        traceback.print_exc()
-        exit()
-except:
-  exit()
-  pass
+def start():
+  reset_file("recent_urls.txt")
+
+  try:
+    for j in range(1,5):
+      for i in range(1,51):
+        try:
+          system(f"python giveaway.py {i} {j}")
+          print("Nb of giveaway found " , len(print_file_info("recent_urls.txt").split("\n")))
+          if len(print_file_info("recent_urls.txt").split("\n")) >= MAX:
+            return(True)
+        except:
+          traceback.print_exc()
+          return(True)
+  except:
+    return(False)
+    pass
+
+
+
+for i in range(1,5):
+  print(i)
+  start()
+  system("python main.py")
+  time.sleep(3600 - randint(0,1000))
+  print("Sleeping Zzzz...")

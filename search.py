@@ -194,9 +194,9 @@ def who_many_people_to_tag(text,accounts_to_tag):
     
     for two in d.two_poeple_list:
         if two.lower() in text.lower():
-            return(acc[0]+" "+acc[1])
+            return(" " + acc[0]+" "+acc[1])
     
-    return(" ".join(acc))
+    return(" " + " ".join(acc))
     
 def check_if_we_need_to_tag_two(text):
     text = text.replace("\n", " ") 

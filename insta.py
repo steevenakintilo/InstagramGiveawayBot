@@ -137,12 +137,14 @@ def comment_a_post(S,url,text):
 
     time.sleep(2)
     print("comment done")
+    return True
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
         print("Wifi error sleeping 3 minutes")
         time.sleep(180)
      else:
         print("Bref comment")
+        return False
 
 def follow_an_user(S,user,mode):
    
@@ -248,6 +250,27 @@ def print_pkl_info():
         data = pickle.load(file)
     return (data)
 
+def watch_reels(S,wait_time):
+  try:
+    S.driver.implicitly_wait(15)
+    S.driver.get("https://www.instagram.com/reels/")  
+    more_or_less_10_percent = int((wait_time * 2)/10)
+    x = randint(1,3) 
+    if x == 1:
+      nb_of_reels_to_watch = wait_time * 2
+    elif x == 2:
+      nb_of_reels_to_watch = wait_time * 2 - more_or_less_10_percent
+    else:
+      nb_of_reels_to_watch = wait_time * 2 + more_or_less_10_percent
+    
+    for i in range(nb_of_reels_to_watch):
+      action = ActionChains(S.driver)
+      action.send_keys(Keys.ARROW_DOWN).perform()
+      time.sleep(randint(25,35))
+  except:
+     print("Bref reels")
+     time.sleep(wait_time + 1)
+
 
 def write_into_file(path, x):
     with open(path, "w") as f:
@@ -263,7 +286,8 @@ def instabot():
     S = Scraper()
     login(S,S.account_email_or_username,S.account_password)
      
-  time.sleep(5)  
+  time.sleep(5)
+
   list_of_tweet_ = print_file_info("urls.txt").split("\n")
   list_of_tweet = []
   for l in list_of_tweet_:
@@ -295,34 +319,44 @@ def instabot():
 
   t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
   
-  a = "d"
-  if a == "d":
-    for url in tweet_url:
-      print(f"Giveaway {idx} / {len(tweet_url)}")
-      if like_a_post(S,url) == True:
-        time.sleep(5)
-        #a = like_a_post(S,url)
-        #print("Value of a " , a)
-        if t_comment_or_not[idx] == True:
-          comment_a_post(S,url,t_full_comment[idx])
-        save_a_post(S,url)
-
-        if "@" in t_full_comment[idx]:
-           time.sleep(300)
-        else:
+  for url in tweet_url:
+    print(f"Giveaway {idx} / {len(tweet_url)}")
+    if like_a_post(S,url) == True:
+      time.sleep(5)
+      if t_comment_or_not[idx] == True:
+        if comment_a_post(S,url,t_full_comment[idx]) == False:
             time.sleep(600)
+            like_a_post(S,url)
+            comment_a_post(S,url,t_full_comment[idx])
+      save_a_post(S,url)
+
+      x = randint(1,2)
+      if "@" in t_full_comment[idx]:
+          if x == 1:
+            time.sleep(300)
+          else:
+            watch_reels(S,5)
       else:
-        print("you have already liked the post")
-        time.sleep(30)
-      idx+=1
-    
+          if x == 1:
+            time.sleep(750)
+          else:
+            watch_reels(S,12)
+    else:
+      print("you have already liked the post")
+      time.sleep(30)
+    idx+=1
+  
   user_nb = 0
   for acc in t_follows:
     print(f"User Nb: {user_nb} / {len(t_follows)}")
+    x = randint(1,4)
     if follow_an_user(S,acc,1) == True:
       time.sleep(5)
       follow_an_user(S,acc,2)
-      time.sleep(200)
+      if x == 4:
+         watch_reels(S,5)
+      else:
+        time.sleep(300)
     else:
       time.sleep(20)
     user_nb+=1

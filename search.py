@@ -81,10 +81,18 @@ def get_list_of_comment_of_a_post(S,url):
       S.driver.implicitly_wait(15)
       S.driver.get(url)
       
-      element = WebDriverWait(S.driver, 3).until(EC.presence_of_element_located((By.XPATH, f"/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[2]/div/div[3]/div[1]/div/div/div[2]/div[1]/div[1]/div/div[2]/span")))      
-      S.driver.execute_script("arguments[0].scrollIntoView();", element)
+      try:
+        element = WebDriverWait(S.driver, 10).until(EC.presence_of_element_located((By.XPATH, f"/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[2]/div/div[3]/div[1]/div/div/div[2]/div[1]/div[1]/div/div[2]/span")))      
+        S.driver.execute_script("arguments[0].scrollIntoView();", element)
+      except:
+          try:
+            element = WebDriverWait(S.driver, 10).until(EC.presence_of_element_located((By.XPATH, f"/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[2]/div/div[3]/div[1]/div[1]/div/div[2]/div[1]/div[1]/div/div[2]/span")))      
+            S.driver.execute_script("arguments[0].scrollIntoView();", element)
+          except:
+            return False
       time.sleep(0.1)
       list_of_comment.append(element.text)
+      print(list_of_comment)
       return (list_of_comment)
     except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
@@ -291,7 +299,7 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
               if what_to_cmt == "Ok!":
                 full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
               else:
-                full_phrase = delete_url(what_to_cmt) + who_many_people_to_tag(t,accounts_to_tag) + " "
+                full_phrase = delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "
           else:
               nb_word = what_to_cmt.split()
               full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + delete_url(what_to_cmt) + " " + who_many_people_to_tag(t,accounts_to_tag) + " "

@@ -310,12 +310,17 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
           if check_if_we_need_to_comment(t) == True:
               full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)] + " " + delete_url(what_to_cmt) + " "
           else:
-              full_phrase = ""  
+              full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)]  
         if check_if_we_need_to_tag(t) == True or (check_if_we_need_to_tag_two(t) == True and check_if_we_need_to_tag(t) == True):
           tweets_need_to_comment_or_not.append(True)
         else:
           tweets_need_to_comment_or_not.append(True)
-        tweets_full_comment.append(remove_emojie(full_phrase).replace('"',"").replace("“","").replace("«","").replace("»","").replace("”",""))
+        
+        x = remove_emojie(full_phrase).replace('"',"").replace("“","").replace("«","").replace("»","").replace("”","")
+
+        if len(x) < 2:
+            x = d.sentence_for_random_comment[randint(0,len(d.sentence_for_random_comment) - 1)]
+        tweets_full_comment.append(x)
         tweets_account_to_follow.append(list_of_account_to_follow("" ,t))  
         idxx+=1
       

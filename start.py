@@ -11,7 +11,6 @@ MAX = 5
 
 def start():
   reset_file("recent_urls.txt")
-
   try:
     for j in range(1,5):
       for i in range(1,51):

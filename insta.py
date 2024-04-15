@@ -26,7 +26,7 @@ class Scraper:
     options = uc.ChromeOptions() 
     options.add_experimental_option(
     "prefs", {"credentials_enable_service": False, "profile.password_manager_enabled": False})
-    #options.add_argument('headless')
+    options.add_argument('headless')
     ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'
     options.add_argument(f'--user-agent={ua}') 
     driver = uc.Chrome(options=options)
@@ -189,16 +189,20 @@ def save_a_post(S,url):
     try:
       element = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "[aria-label='Enregistrer']")))      
       element.click()
+      return True
     except:
        print("You have already saved the post")
+       return False
     time.sleep(3)
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
         print("Wifi error sleeping 3 minutes")
         time.sleep(180)
+        return True
      else:
         print("Bref save")
-
+        return True
+     
 def get_tweet_text(S,url):
   try:
     S.driver.implicitly_wait(15)
@@ -274,17 +278,22 @@ def watch_reels(S,wait_time):
      time.sleep(wait_time + 1)
 
 
+def reset_file(path):  
+    f = open(path, "w")
+    f.write("")    
+    f.close  
 def write_into_file(path, x):
     with open(path, "w") as f:
         f.write(str(x))
+
 def instabot():
   S = Scraper()
   
   # try:
-  # #   login(S,S.account_email_or_username,S.account_password)
+  #   login(S,S.account_email_or_username,S.account_password)
   # except:
   #   return("")
-
+  
   try:
     #a = 10/0
     ck = print_pkl_info()
@@ -299,10 +308,7 @@ def instabot():
           EC.presence_of_element_located((By.XPATH, S.refuse_coockie_xpath)))
 
       element.click()
-      try:
-        cookies = json.load(open(f"cookies.json","rb"))
-      except:
-        cookies = pickle.load(open(f"cookies.pkl","rb"))
+      cookies = pickle.load(open(f"cookies.pkl","rb"))
       
       for cookie in cookies:
           S.driver.add_cookie(cookie)
@@ -310,12 +316,29 @@ def instabot():
       time.sleep(5)
   except:
     print("fin bref")
-    login(S,S.account_email_or_username,S.account_password)
+    try:
+      login(S,S.account_email_or_username,S.account_password)
+    except:
+       time.sleep(600)
+       return("")
     save_coockie(S)
     
   time.sleep(5)
 
+
+
+  automate_account_warning = "/html/body/div[2]/div/div/div[2]/div/div/div[1]/section/main/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[2]/div/div[1]/div/span"
+
+  try:
+    element = WebDriverWait(S.driver, 15).until(
+            EC.presence_of_element_located((By.XPATH, S.automate_account_warning)))
+    element.click()
+  except:
+     pass
+  print("ok")
+
   list_of_tweet_ = print_file_info("recent_urls.txt").split("\n")
+  all_tweet = print_file_info("url.txt").split("\n")
   list_of_tweet = []
   for l in list_of_tweet_:
      if len(l) > 5:
@@ -350,19 +373,27 @@ def instabot():
   time.sleep(30)
   t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
   
+  if len(t_comment_or_not) == 0:
+    reset_file("url.txt")
+    for post in all_tweet:
+      if post not in list_of_tweet_:
+          write_into_file("url.txt",post+"\n")
+    
+    time.sleep(3600)
+    return("")
+     
   for url in tweet_url:
     print(f"Giveaway {idx} / {len(tweet_url)}")
-    if like_a_post(S,url) == True:
+    if save_a_post(S,url) == True:
       time.sleep(5)
       if t_comment_or_not[idx] == True:
          if comment_a_post(S,url,t_full_comment[idx]) == False:
-            watch_reels(S,1)
+            if randint(1,2) == 1:
+              watch_reels(S,1)
+            else:
+               time.sleep(60)
             failed_giveaway_url.append(url)
-            failed_giveaway_comment.append(t_full_comment[idx])
-            # like_a_post(S,url)
-            # watch_reels(S,4)
-            # comment_a_post(S,url,t_full_comment[idx])
-      save_a_post(S,url)
+      like_a_post(S,url)
 
       x = randint(1,2)
       if "@" in t_full_comment[idx]:
@@ -397,26 +428,10 @@ def instabot():
     user_nb+=1
   
   if len(failed_giveaway_url) > 0:
-     time.sleep(120)
-     for i in range(len(failed_giveaway_url)):
-        print(f"Retry giveaway {i} / {len(failed_giveaway_url)}")
-        if like_a_post(S,failed_giveaway_url[i]) == True:
-          comment_a_post(S,failed_giveaway_url[i],failed_giveaway_comment[i])
-          save_a_post(S,failed_giveaway_url[i])
-          x = randint(1,2)
-          if "@" in t_full_comment[idx]:
-              if x == 1:
-                time.sleep(60)
-              else:
-                watch_reels(S,2)
-          else:
-              if x == 1:
-                time.sleep(120)
-              else:
-                watch_reels(S,3)
-        else:
-           print("You have already liked the tweet")
-           time.sleep(30)
+     reset_file("url.txt")
+     for post in all_tweet:
+        if post not in failed_giveaway_url:
+           write_into_file("url.txt",post+"\n")
 
   print("All done")
   pass

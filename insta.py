@@ -13,7 +13,6 @@ import undetected_chromedriver as uc
 import pickle
 import os
 import json
-
 import emoji
 
 from search import giveaway_from_url_file , get_list_of_comment_of_a_post
@@ -29,6 +28,16 @@ class Scraper:
     options.add_argument('headless')
     ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'
     options.add_argument(f'--user-agent={ua}') 
+    #options.add_argument("chrome.switches")
+    options.add_argument("--disable-extensions")
+    
+    #options.add_argument("user-data-dir=" + chromeProfilePath)
+    
+    
+    #options.add_argument(r'--profile-directory=Profile 3')
+    
+    #options.add_argument(r'--profile-directory=Profile ' + str(profiles))
+
     driver = uc.Chrome(options=options)
     driver.maximize_window()
     login_link = "https://chat.openai.com/auth/login"
@@ -189,11 +198,13 @@ def save_a_post(S,url):
     try:
       element = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "[aria-label='Enregistrer']")))      
       element.click()
+      time.sleep(1)
       return True
     except:
        print("You have already saved the post")
        return False
     time.sleep(3)
+
   except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
         print("Wifi error sleeping 3 minutes")
@@ -202,8 +213,33 @@ def save_a_post(S,url):
      else:
         print("Bref save")
         return True
+
+
+
+def unsave_a_post(S,url):
+  try:
+    S.driver.implicitly_wait(15)
+    S.driver.get(url)
+
+    try:
+      element = WebDriverWait(S.driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, "[aria-label='Supprimer']")))      
+      element.click()
+      return True
+    except:
+       return False
+    time.sleep(3)
+
+  except Exception as e:
+     if "net::ERR_NAME_NOT_RESOLVED" in str(e):
+        print("Wifi error sleeping 3 minutes")
+        time.sleep(180)
+        return True
+     else:
+        print("Bref unsave")
+        return True
      
-def get_tweet_text(S,url):
+
+def get_post_text(S,url):
   try:
     S.driver.implicitly_wait(15)
     S.driver.get(url)
@@ -232,7 +268,7 @@ def get_tweet_text(S,url):
         return("","")
 
 
-def get_tweet_user(S,url):
+def get_post_user(S,url):
   try:
     S.driver.implicitly_wait(15)
     S.driver.get(url)
@@ -286,6 +322,7 @@ def write_into_file(path, x):
     with open(path, "w") as f:
         f.write(str(x))
 
+
 def instabot():
   S = Scraper()
   
@@ -319,14 +356,13 @@ def instabot():
     try:
       login(S,S.account_email_or_username,S.account_password)
     except:
-       time.sleep(600)
+       time.sleep(1500)
        return("")
     save_coockie(S)
     
   time.sleep(5)
 
-
-
+  print(f"{S.account_email_or_username} is running")
   automate_account_warning = "/html/body/div[2]/div/div/div[2]/div/div/div[1]/section/main/div[2]/div/div/div/div/div[1]/div/div/div[2]/div[2]/div/div[1]/div/span"
 
   try:
@@ -337,63 +373,61 @@ def instabot():
      pass
   print("ok")
 
-  list_of_tweet_ = print_file_info("recent_urls.txt").split("\n")
-  all_tweet = print_file_info("url.txt").split("\n")
-  list_of_tweet = []
-  for l in list_of_tweet_:
+  list_of_post_ = print_file_info("recent_urls.txt").split("\n")
+  all_post = print_file_info("url.txt").split("\n")
+  list_of_post = []
+  for l in list_of_post_:
      if len(l) > 5:
-        list_of_tweet.append(l)
+        list_of_post.append(l)
      else:
         print("skip")
-  tweet_text = []
-  tweet_user_made = []
-  tweet_url = []
-  failed_giveaway_url = []
+  post_text = []
+  post_user_made = []
+  post_url = []
+  succes_giveaway_url = []
   failed_giveaway_comment = []
   
   idx = 0
-  for url in list_of_tweet:
-    s_text , s_user_ = get_tweet_text(S,url)
-    s_user = get_tweet_user(S,url)
+  for url in list_of_post:
+    s_text , s_user_ = get_post_text(S,url)
+    s_user = get_post_user(S,url)
 
     time.sleep(5)
     if s_user_ != "":
-      tweet_text.append(s_text)
-      tweet_user_made.append(s_user_)
+      post_text.append(s_text)
+      post_user_made.append(s_user_)
       if s_text != "" and s_user_ != "":
-        tweet_url.append(url)
+        post_url.append(url)
     else:
       if s_text != "":
-        tweet_text.append(s_text)
+        post_text.append(s_text)
       if s_user != "":
-        tweet_user_made.append(s_user)
+        post_user_made.append(s_user)
       if s_text != "" and s_user != "":
-        tweet_url.append(url)
+        post_url.append(url)
 
   time.sleep(30)
-  t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,tweet_text,tweet_user_made,tweet_url)
+  t_comment_or_not , t_full_comment, t_follows = giveaway_from_url_file(S,post_text,post_user_made,post_url)
   
   if len(t_comment_or_not) == 0:
-    reset_file("url.txt")
-    for post in all_tweet:
-      if post not in list_of_tweet_:
-          write_into_file("url.txt",post+"\n")
     
-    time.sleep(3600)
+    time.sleep(1500)
     return("")
      
-  for url in tweet_url:
-    print(f"Giveaway {idx} / {len(tweet_url)}")
+  for url in post_url:
+    print(f"Giveaway {idx} / {len(post_url)}")
     if save_a_post(S,url) == True:
       time.sleep(5)
       if t_comment_or_not[idx] == True:
-         if comment_a_post(S,url,t_full_comment[idx]) == False:
-            if randint(1,2) == 1:
-              watch_reels(S,1)
-            else:
-               time.sleep(60)
-            failed_giveaway_url.append(url)
-      like_a_post(S,url)
+        if comment_a_post(S,url,t_full_comment[idx]) == False:
+          unsave_a_post(S,url)
+          if randint(1,2) == 1:
+            watch_reels(S,1)
+          else:
+              time.sleep(60)
+        else:        
+          like_a_post(S,url)
+          succes_giveaway_url.append(url)
 
       x = randint(1,2)
       if "@" in t_full_comment[idx]:
@@ -426,13 +460,6 @@ def instabot():
     else:
       time.sleep(20)
     user_nb+=1
-  
-  if len(failed_giveaway_url) > 0:
-     reset_file("url.txt")
-     for post in all_tweet:
-        if post not in failed_giveaway_url:
-           write_into_file("url.txt",post+"\n")
-
   print("All done")
   pass
 

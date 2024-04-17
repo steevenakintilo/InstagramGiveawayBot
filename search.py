@@ -92,7 +92,6 @@ def get_list_of_comment_of_a_post(S,url):
             return False
       time.sleep(0.1)
       list_of_comment.append(element.text)
-      print(list_of_comment)
       return (list_of_comment)
     except Exception as e:
      if "net::ERR_NAME_NOT_RESOLVED" in str(e):
@@ -102,21 +101,22 @@ def get_list_of_comment_of_a_post(S,url):
      else:
         return(False)
 
+
 def copy_a_comment(selenium_session,url):
     account_to_blacklist = print_file_info("account_blacklist.txt")
     try:
         tag_nb = 0
         d = Data()
-        list_of_comment_of_a_tweet = get_list_of_comment_of_a_post(selenium_session,url)
+        list_of_comment_of_a_post = get_list_of_comment_of_a_post(selenium_session,url)
         time.sleep(4)
 
-        if list_of_comment_of_a_tweet == False or len(list_of_comment_of_a_tweet) == 0 or len(list_of_comment_of_a_tweet[0]) > 135:
+        if list_of_comment_of_a_post == False or len(list_of_comment_of_a_post) == 0 or len(list_of_comment_of_a_post[0]) > 135:
             return (d.sentence_for_random_comment[randint(0,len(d.sentence_for_random_comment) - 1)])
 
-        check_if_tag_only = list_of_comment_of_a_tweet[0].replace("\n","").split(" ")
-        if list_of_comment_of_a_tweet[0].count("@") == len(check_if_tag_only):
+        check_if_tag_only = list_of_comment_of_a_post[0].replace("\n","").split(" ")
+        if list_of_comment_of_a_post[0].count("@") == len(check_if_tag_only):
             return (d.sentence_for_random_comment[randint(0,len(d.sentence_for_random_comment) - 1)])
-        xxx = list_of_comment_of_a_tweet[0]
+        xxx = list_of_comment_of_a_post[0]
         rs = re.sub(r'@\w+\s*', '', xxx)   
         return (rs)          
             
@@ -247,14 +247,14 @@ def remove_emojie(text):
     return emoji.replace_emoji(text, replace='')
     #return emoji.get_emoji_regexp().sub(r'',text)
 
-def list_of_account_to_follow(maker_of_the_tweet,sentence):
+def list_of_account_to_follow(maker_of_the_post,sentence):
     
     sentence = remove_emojie(sentence).replace("\n"," ")
-    account_to_follow = [maker_of_the_tweet.replace("@","")]
+    account_to_follow = [maker_of_the_post.replace("@","")]
     s = sentence.split(" ")
     for word in s:
         try:
-            if word[0] == "@" and word.replace("@","") != maker_of_the_tweet.replace("@",""):
+            if word[0] == "@" and word.replace("@","") != maker_of_the_post.replace("@",""):
                 if "\n" in word:
                     word = word.split("\n")[0]
                 if check_alpha_numeric(word) == False:
@@ -265,7 +265,7 @@ def list_of_account_to_follow(maker_of_the_tweet,sentence):
     account_to_follow = list(dict.fromkeys(account_to_follow))
     return (" ".join(account_to_follow))
 
-def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
+def giveaway_from_url_file(S,posts_text,account_list,post_from_url):
     try:
       d = Data()
       accounts_to_tag_ = d.accounts_to_tag_
@@ -280,17 +280,17 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
       else:
           accounts_to_tag = [' @Instagram ', '@Mrbeast ', '@433 ']   
       
-      #tweet_from_url = print_file_info("recent_url.txt").split("\n")
-      tweets_need_to_comment_or_not = []
-      tweets_full_comment = []
-      tweets_account_to_follow = []
+      #post_from_url = print_file_info("recent_url.txt").split("\n")
+      posts_need_to_comment_or_not = []
+      posts_full_comment = []
+      posts_account_to_follow = []
       full_phrase = ""
       print_data = False
       idxx = 0
       iihe = 0
       
-      for t in tweets_text:
-        current_url = tweet_from_url[idxx]
+      for t in posts_text:
+        current_url = post_from_url[idxx]
         what_to_cmt = what_to_comment(t,S,current_url)
         if what_to_cmt == "Ok!":
             what_to_cmt = d.sentence_for_random_comment[randint(0,len(d.sentence_for_random_comment) - 1)]
@@ -320,25 +320,25 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
           else:
               full_phrase = d.sentence_for_tag[randint(0,len(d.sentence_for_tag) - 1)]  
         if check_if_we_need_to_tag(t) == True or (check_if_we_need_to_tag_two(t) == True and check_if_we_need_to_tag(t) == True):
-          tweets_need_to_comment_or_not.append(True)
+          posts_need_to_comment_or_not.append(True)
         else:
-          tweets_need_to_comment_or_not.append(True)
+          posts_need_to_comment_or_not.append(True)
         
         x = remove_emojie(full_phrase).replace('"',"").replace("“","").replace("«","").replace("»","").replace("”","")
 
         if len(x) < 2:
             x = d.sentence_for_random_comment[randint(0,len(d.sentence_for_random_comment) - 1)]
-        tweets_full_comment.append(x)
-        tweets_account_to_follow.append(list_of_account_to_follow("" ,t))  
+        posts_full_comment.append(x)
+        posts_account_to_follow.append(list_of_account_to_follow("" ,t))  
         idxx+=1
       
       for a in account_list:
-        if a not in tweets_account_to_follow and a != "f":
-              tweets_account_to_follow.append(a.lower())
+        if a not in posts_account_to_follow and a != "f":
+              posts_account_to_follow.append(a.lower())
       
       full_list_of_account_to_follow = []
 
-      for account in tweets_account_to_follow:
+      for account in posts_account_to_follow:
           if " " in account:
               a = account.split(" ")
               for k in range(len(a)):
@@ -346,19 +346,21 @@ def giveaway_from_url_file(S,tweets_text,account_list,tweet_from_url):
                       full_list_of_account_to_follow.append(a[k])
           else:
               if len(account) > 1 and account not in full_list_of_account_to_follow:
+                  if account[-1] == ".":
+                      account = account[:-1]
                   full_list_of_account_to_follow.append(account)
       if print_data == False:
-          print(tweets_full_comment)
-          print(tweets_need_to_comment_or_not)
+          print(posts_full_comment)
+          print(posts_need_to_comment_or_not)
           print(full_list_of_account_to_follow)
-      #print(tweets_need_to_comment_or_not)
+      #print(posts_need_to_comment_or_not)
       print("nb of acc to follow " , len(full_list_of_account_to_follow))
       
-      return (tweets_need_to_comment_or_not,tweets_full_comment,full_list_of_account_to_follow)
+      return (posts_need_to_comment_or_not,posts_full_comment,full_list_of_account_to_follow)
 
       
     except Exception as e:
         print("YOLO YOLO BANG BANG")
         print("Error " )
         traceback.print_exc()
-        return (tweets_need_to_comment_or_not,tweets_full_comment,tweets_account_to_follow)
+        return (posts_need_to_comment_or_not,posts_full_comment,posts_account_to_follow)

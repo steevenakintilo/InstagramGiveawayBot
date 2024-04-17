@@ -23,6 +23,7 @@ from selenium.webdriver.common.keys import Keys
 
 import sys 
 import logging
+import pandas as pd
 
 MINTIME = 0
 MAXTIME = 0
@@ -59,6 +60,11 @@ def reset_file(path):
     f.close  
 
 def insta_giveaway(S,i,page_nb):
+    insta_url = "G:/Mon Drive/bot/data_insta.csv"
+
+    #dft = pd.read_csv(insta_url, sep=";")
+    #dft.shape
+    #tweet, date_tweet, tas, link, user, pred, ddone, lang, prio, LFO = dft.iloc[index][['tweets', 'Date', 'TAS', 'links', 'user', 'pred', 'Done', 'Lang', 'Prio', 'LFO']]
     urls = []
     file_urls = print_file_info("url.txt").split("\n")
     S.driver.get(f"https://www.jeu-concours.biz/concours-instagram.php?page={page_nb}")
@@ -90,12 +96,15 @@ def insta_giveaway(S,i,page_nb):
     time.sleep(0.1)
 
     new_window_url = S.driver.current_url
-    if new_window_url not in urls and new_window_url not in file_urls:
-       write_into_file("url.txt",new_window_url + "\n")
-       write_into_file("recent_urls.txt",new_window_url + "\n")
-       urls.append(new_window_url)
+    last = new_window_url[:-1]
+    lastchar = new_window[-1]
+    split_url = new_window_url.split("/")
+    last_split_elem = split_url[-2].replace("/","")
+    if new_window_url not in urls and new_window_url not in file_urls and last not in urls and last not in file_urls and last_split_elem not in urls and last_split_elem not in file_urls: 
+        write_into_file("url.txt",new_window_url + "\n")
+        write_into_file("recent_urls.txt",new_window_url + "\n")
+        urls.append(new_window_url)
 
-    # Close the new window
     S.driver.close()
 
     # Switch back to the original window if needed

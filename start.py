@@ -7,7 +7,7 @@ from os import system
 
 from random import randint
 
-MAX = 5
+MAX = 11
 
 def start():
   reset_file("recent_urls.txt")
@@ -26,11 +26,12 @@ def start():
     return(False)
     pass
 
+print("1")
+start()
+system("python main.py")
+print("Sleeping Zzzz...")
+time.sleep((3600) * 10 - randint(0,1000))
+print("2")
+start()
+system("python main.py")
 
-
-for i in range(1,5):
-  print(i)
-  start()
-  system("python main.py")
-  time.sleep(3600 - randint(0,1000))
-  print("Sleeping Zzzz...")

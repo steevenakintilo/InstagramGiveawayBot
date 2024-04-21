@@ -9,10 +9,9 @@ account_password: ""
 
 # Accounts we want to invite you must but a space at the end of each account
 accounts_to_tag:
-  - ""
-  - ""
-  - ""
-  
+  - "@theolunemars "
+  - "@tou_jeanne "
+  - "@evarangertachambre "
 
 # Those are the word needed on the tweet for the bot to comment but we don't need to lookup to comment a comment for those word:
 word_list_to_not_check_for_copy:

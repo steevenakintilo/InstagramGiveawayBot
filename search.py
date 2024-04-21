@@ -265,6 +265,7 @@ def list_of_account_to_follow(maker_of_the_post,sentence):
     account_to_follow = list(dict.fromkeys(account_to_follow))
     return (" ".join(account_to_follow))
 
+
 def giveaway_from_url_file(S,posts_text,account_list,post_from_url):
     try:
       d = Data()
@@ -285,7 +286,7 @@ def giveaway_from_url_file(S,posts_text,account_list,post_from_url):
       posts_full_comment = []
       posts_account_to_follow = []
       full_phrase = ""
-      print_data = False
+      print_data = True
       idxx = 0
       iihe = 0
       

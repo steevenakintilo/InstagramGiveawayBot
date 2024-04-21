@@ -33,17 +33,10 @@ class Scraper:
     wait_time = 5
     options = webdriver.ChromeOptions()
     options.add_argument("--log-level=3")  # Suppress all logging levels
-    # options.add_experimental_option(
-    # "prefs", {"credentials_enable_service": False, "profile.password_manager_enabled": False})
-    # ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'
-    # options.add_argument(f'--user-agent={ua}') 
-    # driver = uc.Chrome(options=options)
-    
     options.add_argument('headless')    
     driver = webdriver.Chrome(options=options)  # to open the chromedriver    
     
-    #options.headless = False
-
+    
 def write_into_file(path, x):
     with open(path, "a") as f:
         f.write(str(x))
@@ -62,9 +55,6 @@ def reset_file(path):
 def insta_giveaway(S,i,page_nb):
     insta_url = "G:/Mon Drive/bot/data_insta.csv"
 
-    #dft = pd.read_csv(insta_url, sep=";")
-    #dft.shape
-    #tweet, date_tweet, tas, link, user, pred, ddone, lang, prio, LFO = dft.iloc[index][['tweets', 'Date', 'TAS', 'links', 'user', 'pred', 'Done', 'Lang', 'Prio', 'LFO']]
     urls = []
     file_urls = print_file_info("url.txt").split("\n")
     S.driver.get(f"https://www.jeu-concours.biz/concours-instagram.php?page={page_nb}")
@@ -83,9 +73,9 @@ def insta_giveaway(S,i,page_nb):
     
        
     time.sleep(0.1)
-    ggw = f"/html/body/section/div/div/div[1]/div[2]/article[{str(i)}]/nav/ul/li[4]/a"
+    giveaway_xpath = f"/html/body/section/div/div/div[1]/div[2]/article[{str(i)}]/nav/ul/li[4]/a"
     element =  WebDriverWait(S.driver,15).until(
-        EC.presence_of_element_located((By.XPATH, ggw)))
+        EC.presence_of_element_located((By.XPATH, giveaway_xpath)))
     
     S.driver.execute_script("arguments[0].scrollIntoView();", element)
     time.sleep(0.1)
@@ -107,11 +97,10 @@ def insta_giveaway(S,i,page_nb):
 
     S.driver.close()
 
-    # Switch back to the original window if needed
     original_window = S.driver.window_handles[0]
     S.driver.switch_to.window(original_window)
 
-def fck():
+def giveaway_launcher():
   try:
     S = Scraper()
     nb = int(sys.argv[2])
@@ -122,4 +111,4 @@ def fck():
     pass
     
 
-fck()
+giveaway_launcher()

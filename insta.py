@@ -22,25 +22,19 @@ import yaml
 class Scraper:
     
     wait_time = 5
+    with open("configuration.yml", "r") as file:
+      data = yaml.load(file, Loader=yaml.FullLoader)
     
     options = uc.ChromeOptions() 
     options.add_experimental_option(
     "prefs", {"credentials_enable_service": False, "profile.password_manager_enabled": False})
-    options.add_argument('headless')
+    headless = data["headless"]
+    if headless == True:
+      options.add_argument('headless')
+
     ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36'
     options.add_argument(f'--user-agent={ua}') 
-    #options.add_argument("chrome.switches")
     options.add_argument("--disable-extensions")
-    #chromeProfilePath = r"C:\Users\sakin\AppData\Local\Google\Chrome\User Data\Profile "
-    
-    #options.add_argument("user-data-dir=" + chromeProfilePath)
-    
-    
-    #options.add_argument(r"--user-data-dir=C:\Users\sakin\AppData\Local\Google\Chrome\User Data\Profile 3")
-    #options.add_argument(r'--profile-directory=Profile 3')
-    
-    #options.add_argument(r'--profile-directory=Profile ' + str(profiles))
-
     driver = uc.Chrome(options=options)
     driver.maximize_window()
     login_link = "https://chat.openai.com/auth/login"
@@ -49,9 +43,6 @@ class Scraper:
     accept_coockie_xpath = "/html/body/div[5]/div[1]/div/div[2]/div/div/div/div/div[2]/div/button[1]"
     refuse_coockie_xpath = "/html/body/div[4]/div[1]/div/div[2]/div/div/div/div/div[2]/div/button[2]"
     connect_btn_xpath="/html/body/div[2]/div/div/div[2]/div/div/div[1]/section/main/article/div[2]/div[1]/div[2]/form/div/div[3]/button/div"
-    with open("configuration.yml", "r") as file:
-      data = yaml.load(file, Loader=yaml.FullLoader)
-    
     account_email_or_username = data["account_email_or_username"]
     account_password = data["account_password"]
 
@@ -141,9 +132,7 @@ def comment_a_post(S,url,text):
     time.sleep(3)
     element.click()
     time.sleep(3)
-    # S.driver.execute_script("arguments[0].scrollIntoView();", element)
-    # element.send_keys(text)
-
+    
     S.driver.switch_to.active_element.send_keys(text)
     element = WebDriverWait(S.driver, 15).until(
       EC.presence_of_element_located((By.XPATH, "/html/body/div[2]/div/div/div[2]/div/div/div[1]/div[1]/div[2]/section/main/div/div[1]/div/div[2]/div/div[4]/section/div/form/div/div[2]/div")))
@@ -353,13 +342,7 @@ def write_into_file(path, x):
 def instabot():
   S = Scraper()
   
-  # try:
-  #   login(S,S.account_email_or_username,S.account_password)
-  # except:
-  #   return("")
-  
   try:
-    #a = 10/0
     ck = print_pkl_info()
     if len(str(ck)) > 5:
       S.driver.implicitly_wait(15)

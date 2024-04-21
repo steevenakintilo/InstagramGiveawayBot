@@ -6,11 +6,13 @@ account_email_or_username: ""
 
 account_password: ""
 
+
 # Accounts we want to invite you must but a space at the end of each account
 accounts_to_tag:
-  - "@theolunemars "
-  - "@tou_jeanne "
-  - "@evarangertachambre "
+  - ""
+  - ""
+  - ""
+  
 
 # Those are the word needed on the tweet for the bot to comment but we don't need to lookup to comment a comment for those word:
 word_list_to_not_check_for_copy:
@@ -635,13 +637,6 @@ sentence_for_random_comment:
   
 # If headless is set to True the bot won't open a chrome windows while doing giveaways otherwise it will
 headless: True
-
-#The minimum time to wait in second beetween each follow, giveaway done (Like,Retweet,Comment if needed) , random tweet, random retweet the bot will choose a random time beetween min and max time
-min_time: 0
-
-#The maximum time to wait in second beetween each follow, giveaway done (Like,Retweet,Comment if needed) , random tweet, random retweet the bot will choose a random time beetween min and max time
-max_time: 0
-
 
 #If the option is set to False the bot will only @ account withouth the sentence when he need to
 add_sentence_to_tag: False
